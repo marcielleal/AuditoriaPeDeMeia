@@ -1,32 +1,34 @@
-name: Autogenerate Directory Index
+name: Update Index HTML
+
 on:
   push:
     branches:
-      - main  # Ou a sua branch padrão
+      - main  # Ou a sua branch principal
+    paths:
+      - '**.html' # Só roda se houver mudanças em arquivos HTML
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     permissions:
-      pages: write
-      id-token: write
-    
+      contents: write
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate Directory Listings
-        uses: jayanta525/github-pages-directory-listing@v4.0.0
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          FOLDER: .  # Altere para a pasta específica se não quiser listar o root
-          EXCLUDE_DIRS: '.git,.github' # Ignora pastas internas do GitHub
+          python-version: '3.x'
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          # O upload deve ser da pasta onde o index.html foi gerado
-          path: '.' 
+      - name: Generate Index
+        run: python generate_index.py
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "🤖 Update index.html with new files" || exit 0
+          git push
