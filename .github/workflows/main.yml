@@ -1,0 +1,32 @@
+name: Autogenerate Directory Index
+on:
+  push:
+    branches:
+      - main  # Ou a sua branch padrão
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate Directory Listings
+        uses: jayanta525/github-pages-directory-listing@v4.0.0
+        with:
+          FOLDER: .  # Altere para a pasta específica se não quiser listar o root
+          EXCLUDE_DIRS: '.git,.github' # Ignora pastas internas do GitHub
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # O upload deve ser da pasta onde o index.html foi gerado
+          path: '.' 
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
